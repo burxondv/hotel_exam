@@ -2,11 +2,14 @@ package v1
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/burxondv/hotel_exam/api/models"
 	"github.com/burxondv/hotel_exam/storage/repo"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // @Security ApiKeyAuth
@@ -173,6 +176,45 @@ func (h *handlerV1) DeleteRoom(c *gin.Context) {
 	})
 }
 
+// @Security ApiKeyAuth
+// @Router /room/file-upload [post]
+// @Summary File upload room
+// @Description File upload room
+// @Tags room
+// @Accept json
+// @Produce json
+// @Param file formData file true "File"
+// @Success 200 {object} models.ResponseOK
+// @Failure 500 {object} models.ErrorResponse
+func (h *handlerV1) UploadFileRoom(c *gin.Context) {
+	var file File
+
+	err := c.ShouldBind(&file)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	id := uuid.New()
+	fileName := id.String() + filepath.Ext(file.File.Filename)
+	dst, _ := os.Getwd()
+
+	if _, err := os.Stat(dst + "/media/room"); os.IsNotExist(err) {
+		os.Mkdir(dst+"/media", os.ModePerm)
+	}
+
+	filePath := "/media/room/" + fileName
+	err = c.SaveUploadedFile(file.File, dst+filePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"filename": filePath,
+	})
+}
+
 func getRoomResponse(data *repo.GetAllRoomsResult) *models.GetAllRoomResponse {
 	response := models.GetAllRoomResponse{
 		Rooms: make([]*models.Room, 0),
@@ -194,10 +236,10 @@ func getRoomResponse(data *repo.GetAllRoomsResult) *models.GetAllRoomResponse {
 
 func parseRoomModel(room *repo.Room) models.Room {
 	return models.Room{
-		ID:           room.ID,
-		HotelID:      room.HotelID,
-		Status:       room.Status,
-		ImageUrl:     room.ImageUrl,
-		CreatedAt:    room.CreatedAt,
+		ID:        room.ID,
+		HotelID:   room.HotelID,
+		Status:    room.Status,
+		ImageUrl:  room.ImageUrl,
+		CreatedAt: room.CreatedAt,
 	}
 }

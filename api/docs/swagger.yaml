@@ -893,6 +893,33 @@ paths:
       summary: Update a hotel
       tags:
       - hotel
+  /hotel/file-upload:
+    post:
+      consumes:
+      - application/json
+      description: File upload hotel
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOK'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: File upload hotel
+      tags:
+      - hotel
   /owner:
     get:
       consumes:
@@ -1193,6 +1220,33 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a room
+      tags:
+      - room
+  /room/file-upload:
+    post:
+      consumes:
+      - application/json
+      description: File upload room
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOK'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: File upload room
       tags:
       - room
 securityDefinitions:

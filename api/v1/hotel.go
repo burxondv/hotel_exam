@@ -1,13 +1,21 @@
 package v1
 
 import (
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/burxondv/hotel_exam/api/models"
 	"github.com/burxondv/hotel_exam/storage/repo"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
+
+type File struct {
+	File *multipart.FileHeader `form:"file" binding:"required"`
+}
 
 // @Security ApiKeyAuth
 // @Router /hotel [post]
@@ -174,6 +182,45 @@ func (h *handlerV1) DeleteHotel(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Successfully deleted",
+	})
+}
+
+// @Security ApiKeyAuth
+// @Router /hotel/file-upload [post]
+// @Summary File upload hotel
+// @Description File upload hotel
+// @Tags hotel
+// @Accept json
+// @Produce json
+// @Param file formData file true "File"
+// @Success 200 {object} models.ResponseOK
+// @Failure 500 {object} models.ErrorResponse
+func (h *handlerV1) UploadFileHotel(c *gin.Context) {
+	var file File
+
+	err := c.ShouldBind(&file)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	id := uuid.New()
+	fileName := id.String() + filepath.Ext(file.File.Filename)
+	dst, _ := os.Getwd()
+
+	if _, err := os.Stat(dst + "/media/hotel"); os.IsNotExist(err) {
+		os.Mkdir(dst+"/media", os.ModePerm)
+	}
+
+	filePath := "/media/hotel/" + fileName
+	err = c.SaveUploadedFile(file.File, dst+filePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"filename": filePath,
 	})
 }
 

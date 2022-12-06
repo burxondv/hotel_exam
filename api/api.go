@@ -72,12 +72,15 @@ func New(opt *RouterOptions) *gin.Engine {
 	apiV1.GET("hotel", handlerV1.GetAllHotels)
 	apiV1.PUT("hotel/:id", handlerV1.AuthMiddleware, handlerV1.UpdateHotel)
 	apiV1.DELETE("hotel/:id", handlerV1.AuthMiddleware, handlerV1.DeleteHotel)
+	apiV1.POST("hotel/file-upload", handlerV1.AuthMiddleware, handlerV1.UploadFileHotel)
 
 	apiV1.POST("room", handlerV1.CreateRoom)
 	apiV1.GET("room/:id", handlerV1.GetRoom)
 	apiV1.GET("room", handlerV1.GetAllRoom)
 	apiV1.PUT("room/:id", handlerV1.AuthMiddleware, handlerV1.UpdateRoom)
 	apiV1.DELETE("room/:id", handlerV1.AuthMiddleware, handlerV1.DeleteRoom)
+	apiV1.POST("room/file-upload", handlerV1.AuthMiddleware, handlerV1.UploadFileRoom)
+
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
